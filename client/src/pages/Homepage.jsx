@@ -1,35 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {Star} from  'lucide-react'
+import Navbar from '../components/Navbar'
 
 const Homepage = () => {
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-100 to-white">
+      <Navbar/>
+
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-10 py-5">
-        <h1 className="text-2xl font-bold text-blue-700">Salesor</h1>
-
-        <ul className="hidden md:flex gap-8 text-gray-700 font-medium">
-          <li className="cursor-pointer hover:text-blue-600">Home</li>
-          <li className="cursor-pointer hover:text-blue-600">Features</li>
-          <li className="cursor-pointer hover:text-blue-600">Resources</li>
-          <li className="cursor-pointer hover:text-blue-600">Pricing</li>
-          <li className="cursor-pointer hover:text-blue-600">Info</li>
-        </ul>
-
-        <div className="flex gap-4 items-center">
-          <Link to="/login" className="text-gray-700 font-medium">
-            Log in
-          </Link>
-          <Link
-            to="/signup"
-            className="bg-black text-white px-4 py-2 rounded-md"
-          >
-            Sign Up
-          </Link>
-        </div>
-      </nav>
-
+      
       {/* Hero Section */}
       <section className="text-center mt-20 px-6">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
