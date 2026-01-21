@@ -1,10 +1,8 @@
 import React from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+
 const Dashboard = () => {
   return (
-<div className='flex h-screen'>
-    <Sidebar/>
-    <div className="ml-64 bg-slate-50 min-h-screen p-8">
+    <>
       {/* Top Header */}
       <div className="flex justify-between items-center mb-10">
         <div>
@@ -94,8 +92,7 @@ const Dashboard = () => {
             </div>
         </div>
       </div>
-    </div>
-</div>
+    </>
   );
 };
 
