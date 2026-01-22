@@ -1,6 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    const result = await login(email, password);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.message);
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-[#f0f5ff] flex flex-col overflow-hidden font-sans">
       {/* Header with Logo on the Left */}
@@ -18,13 +37,22 @@ const LoginPage = () => {
             <p className="text-slate-500 text-sm">Log in to manage your sales growth.</p>
           </div>
 
-          <form className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 ml-1">Email Address</label>
               <input 
                 type="email" 
                 placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                required
               />
             </div>
 
@@ -36,11 +64,14 @@ const LoginPage = () => {
               <input 
                 type="password" 
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                required
               />
             </div>
 
-            <button className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-slate-800 transform active:scale-[0.98] transition-all mt-2 shadow-lg shadow-slate-200">
+            <button type="submit" className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-slate-800 transform active:scale-[0.98] transition-all mt-2 shadow-lg shadow-slate-200">
               Sign In
             </button>
           </form>
@@ -51,11 +82,6 @@ const LoginPage = () => {
             <span className="text-xs font-bold text-slate-300 uppercase">Or</span>
             <div className="h-px grow bg-slate-100"></div>
           </div>
-
-          {/* <button className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 py-3.5 rounded-xl hover:bg-slate-50 transition-all font-semibold text-slate-700">
-            <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-5 h-5" alt="Google" />
-            <span className="text-sm">Sign in with Google</span>
-          </button> */}
 
           {/* Redirect link at the bottom of the card */}
           <p className="mt-8 text-center text-sm text-slate-500">

@@ -1,14 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, FileText, CheckCircle, Clock } from 'lucide-react';
+import axios from 'axios';
 
 const Activities = () => {
-    const activities = [
-        { id: 1, type: 'call', title: 'Call with Floyd Miles', description: 'Discussed Q3 requirements and pricing for the new enterprise plan.', time: '10:30 AM', date: 'Today', status: 'Completed' },
-        { id: 2, type: 'email', title: 'Sent proposal to Barone LLC', description: 'Attached the updated PDF with the 15% discount applied.', time: '09:15 AM', date: 'Today', status: 'Sent' },
-        { id: 3, type: 'meeting', title: 'Demo with TechSprit', description: 'Product demo with the engineering team. Focus on API integration.', time: '02:00 PM', date: 'Today', status: 'Scheduled' },
-        { id: 4, type: 'task', title: 'Follow up with Jane Cooper', description: 'She asked for a callback regarding the invoice #INV-2024-001.', time: '04:45 PM', date: 'Yesterday', status: 'Pending' },
-        { id: 5, type: 'email', title: 'Weekly Newsletter', description: 'Sent out the weekly update to all subscribed leads.', time: '11:00 AM', date: 'Yesterday', status: 'Sent' },
-    ];
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchActivities = async () => {
+            try {
+                const { data } = await axios.get('http://localhost:5000/analytics/dashboard');
+                // Map lead updates to activity format
+                const mappedActivities = data.recentActivities.map(lead => ({
+                    id: lead._id,
+                    type: lead.status === 'New' ? 'task' : 'call', // Mocking types based on status
+                    title: `Lead Update: ${lead.name}`,
+                    description: `Status changed to ${lead.status}. Value: ₹ ${lead.value?.toLocaleString()}`,
+                    time: new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    date: new Date(lead.updatedAt).toLocaleDateString() === new Date().toLocaleDateString() ? 'Today' : new Date(lead.updatedAt).toLocaleDateString(),
+                    status: lead.status === 'Won' ? 'Completed' : 'Pending'
+                }));
+                setActivities(mappedActivities);
+            } catch (error) {
+                console.error('Error fetching activities:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchActivities();
+    }, []);
 
     const getIcon = (type) => {
         switch(type) {
@@ -30,32 +51,44 @@ const Activities = () => {
         }
     };
 
+    if (loading) {
+        return (
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        );
+    }
+
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-slate-800 mb-8">Activity Timeline</h1>
       
       <div className="relative border-l-2 border-slate-200 ml-4 space-y-10 pb-10">
-        {activities.map((act) => (
-            <div key={act.id} className="relative pl-10">
-                {/* Timeline Dot with Icon */}
-                <div className={`absolute -left-[19px] top-0 w-10 h-10 rounded-full border-4 border-white ${getBgColor(act.type)} flex items-center justify-center shadow-sm`}>
-                    {getIcon(act.type)}
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-3">
-                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{act.date} • {act.time}</span>
-                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${act.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                                {act.status}
-                             </span>
-                        </div>
+        {activities.length > 0 ? (
+            activities.map((act) => (
+                <div key={act.id} className="relative pl-10">
+                    {/* Timeline Dot with Icon */}
+                    <div className={`absolute -left-[19px] top-0 w-10 h-10 rounded-full border-4 border-white ${getBgColor(act.type)} flex items-center justify-center shadow-sm`}>
+                        {getIcon(act.type)}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">{act.title}</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed">{act.description}</p>
+
+                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-3">
+                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{act.date} • {act.time}</span>
+                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${act.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    {act.status}
+                                 </span>
+                            </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-800 mb-2">{act.title}</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">{act.description}</p>
+                    </div>
                 </div>
-            </div>
-        ))}
+            ))
+        ) : (
+            <p className="text-slate-400 text-sm text-center py-10">No activities found.</p>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, MoreHorizontal, Phone, Mail } from 'lucide-react';
+import axios from 'axios';
+import AddLeadModal from './components/AddLeadModal';
 
 const Leads = () => {
-  const [leads] = useState([
-    { id: 1, name: 'Esther Howard', company: 'Barone LLC', email: 'esther@barone.com', status: 'New', value: '₹ 12,000', source: 'Website', phone: '+91 98765 43210' },
-    { id: 2, name: 'Cameron Williamson', company: 'Gislason and Sons', email: 'cameron@gislason.com', status: 'Contacted', value: '₹ 8,500', source: 'LinkedIn', phone: '+91 98765 43211' },
-    { id: 3, name: 'Robert Fox', company: 'Thiel-Hauck', email: 'robert@thiel.com', status: 'Qualified', value: '₹ 24,000', source: 'Referral', phone: '+91 98765 43212' },
-    { id: 4, name: 'Jacob Jones', company: 'Kirlin and Sons', email: 'jacob@kirlin.com', status: 'Proposal', value: '₹ 15,000', source: 'Website', phone: '+91 98765 43213' },
-    { id: 5, name: 'Courtney Henry', company: 'Denesik Group', email: 'courtney@denesik.com', status: 'Lost', value: '₹ 5,000', source: 'Cold Call', phone: '+91 98765 43214' },
-    { id: 6, name: 'Arlene McCoy', company: 'Feest-O\'Kon', email: 'arlene@feest.com', status: 'New', value: '₹ 9,200', source: 'Website', phone: '+91 98765 43215' },
-  ]);
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchLeads = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/leads');
+      setLeads(data);
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const handleLeadAdded = (newLead) => {
+    setLeads([newLead, ...leads]);
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -18,9 +34,18 @@ const Leads = () => {
       case 'Qualified': return 'bg-purple-100 text-purple-700';
       case 'Proposal': return 'bg-yellow-100 text-yellow-700';
       case 'Lost': return 'bg-red-100 text-red-700';
+      case 'Won': return 'bg-emerald-100 text-emerald-700';
       default: return 'bg-slate-100 text-slate-700';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -30,7 +55,10 @@ const Leads = () => {
           <h1 className="text-2xl font-bold text-slate-800">Leads</h1>
           <p className="text-slate-500 text-sm">Manage your potential customers and opportunities.</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-200">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-200"
+        >
           <Plus size={18} /> Add New Lead
         </button>
       </div>
@@ -68,57 +96,71 @@ const Leads = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {leads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="py-4 px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
-                      {lead.name.charAt(0)}
+            {leads.length > 0 ? (
+              leads.map((lead) => (
+                <tr key={lead._id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
+                        {lead.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-sm">{lead.name}</p>
+                        <p className="text-xs text-slate-500">{lead.company || 'No Company'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-800 text-sm">{lead.name}</p>
-                      <p className="text-xs text-slate-500">{lead.company}</p>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${getStatusColor(lead.status)}`}>
+                      {lead.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 font-medium text-slate-700 text-sm">
+                    ₹ {lead.value?.toLocaleString() || 0}
+                  </td>
+                  <td className="py-4 px-6 text-slate-500 text-sm">
+                    {lead.source || 'N/A'}
+                  </td>
+                  <td className="py-4 px-6 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
+                        <Phone size={16} />
+                      </button>
+                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
+                        <Mail size={16} />
+                      </button>
+                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
+                        <MoreHorizontal size={16} />
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${getStatusColor(lead.status)}`}>
-                    {lead.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 font-medium text-slate-700 text-sm">
-                  {lead.value}
-                </td>
-                <td className="py-4 px-6 text-slate-500 text-sm">
-                  {lead.source}
-                </td>
-                <td className="py-4 px-6 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
-                      <Phone size={16} />
-                    </button>
-                    <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
-                      <Mail size={16} />
-                    </button>
-                    <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                      <MoreHorizontal size={16} />
-                    </button>
-                  </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="py-10 text-center text-slate-400 text-sm">
+                  No leads found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         
         {/* Pagination */}
         <div className="p-4 border-t border-slate-100 flex justify-between items-center">
-            <p className="text-xs text-slate-400">Showing 6 of 24 leads</p>
+            <p className="text-xs text-slate-400">Showing {leads.length} leads</p>
             <div className="flex gap-2">
                 <button className="px-3 py-1 text-xs font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 disabled:opacity-50">Prev</button>
                 <button className="px-3 py-1 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Next</button>
             </div>
         </div>
       </div>
+
+      <AddLeadModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onLeadAdded={handleLeadAdded}
+      />
     </div>
   );
 };

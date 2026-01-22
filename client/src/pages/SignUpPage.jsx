@@ -1,6 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SignUpPage = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    const result = await register({
+      name: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email,
+      password: formData.password,
+      role: 'Admin' // Default role for signup
+    });
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.message);
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-[#f0f5ff] flex flex-col overflow-hidden font-sans">
       {/* Header with Logo on the Left */}
@@ -17,15 +49,35 @@ const SignUpPage = () => {
             <p className="text-slate-500 text-sm">Join 1,000+ businesses using Salesor.</p>
           </div>
 
-          <form className="space-y-3.5">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-3.5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">First Name</label>
-                <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all" />
+                <input 
+                  type="text" 
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all" 
+                  required
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">Last Name</label>
-                <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all" />
+                <input 
+                  type="text" 
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all" 
+                  required
+                />
               </div>
             </div>
 
@@ -33,8 +85,12 @@ const SignUpPage = () => {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">Work Email</label>
               <input 
                 type="email" 
+                name="email"
                 placeholder="you@company.com"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                required
               />
             </div>
 
@@ -42,12 +98,16 @@ const SignUpPage = () => {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">Password</label>
               <input 
                 type="password" 
+                name="password"
                 placeholder="Min. 8 characters"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                required
               />
             </div>
 
-            <button className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-slate-800 transform active:scale-[0.98] transition-all mt-4 shadow-lg shadow-slate-200">
+            <button type="submit" className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-slate-800 transform active:scale-[0.98] transition-all mt-4 shadow-lg shadow-slate-200">
               Get Started
             </button>
           </form>

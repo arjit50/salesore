@@ -15,11 +15,14 @@ import Team from './pages/dashboard/Team'
 import Settings from './pages/dashboard/Settings'
 import DashboardLayout from './components/layout/DashboardLayout'
 
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+
+import SalesAI from './components/SalesAI'
+
 const App = () => {
   return (
-    <div>
- 
-      
+    <AuthProvider>
       <Routes>
         <Route path='/' element={<Homepage/>}/>
         <Route path='/login' element={<LoginPage/>}/>
@@ -29,19 +32,22 @@ const App = () => {
         <Route path='/contact' element={<Contact/>}/>
         <Route path='/pricing' element={<Pricing/>}/>
 
-        <Route path='/dashboard' element={<DashboardLayout/>}>
-          <Route index element={<Dashboard/>}/>
-          <Route path='leads' element={<Leads/>}/>
-          <Route path='pipeline' element={<Pipeline/>}/>
-          <Route path='customers' element={<Customers/>}/>
-          <Route path='activities' element={<Activities/>}/>
-          <Route path='analytics' element={<Analytics/>}/>
-          <Route path='billing' element={<Billing/>}/>
-          <Route path='team' element={<Team/>}/>
-          <Route path='settings' element={<Settings/>}/>
+        <Route element={<ProtectedRoute />}>
+          <Route path='/dashboard' element={<DashboardLayout/>}>
+            <Route index element={<Dashboard/>}/>
+            <Route path='leads' element={<Leads/>}/>
+            <Route path='pipeline' element={<Pipeline/>}/>
+            <Route path='customers' element={<Customers/>}/>
+            <Route path='activities' element={<Activities/>}/>
+            <Route path='analytics' element={<Analytics/>}/>
+            <Route path='billing' element={<Billing/>}/>
+            <Route path='team' element={<Team/>}/>
+            <Route path='settings' element={<Settings/>}/>
+          </Route>
         </Route>
       </Routes>
-    </div>
+      <SalesAI />
+    </AuthProvider>
   )
 }
 
