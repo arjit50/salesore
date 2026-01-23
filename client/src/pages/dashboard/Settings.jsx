@@ -114,8 +114,8 @@ const Settings = () => {
                             type="email" 
                             value={formData.email}
                             onChange={handleChange}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                          />
+                            className="w-full bg-gray-200 cursor-not-allowed border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                         disabled />
                       </div>
                        <div className="col-span-2">
                           <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Bio</label>

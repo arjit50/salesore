@@ -1,8 +1,19 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, UserSquare2, Activity, BarChart3, CreditCard, Settings, Plus, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import LogoutModal from './LogoutModal';
 
 const Sidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   const menuItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
     { name: 'Leads', icon: <UserSquare2 size={20} />, path: '/dashboard/leads' },
@@ -11,14 +22,13 @@ const Sidebar = () => {
     { name: 'Activities', icon: <Activity size={20} />, path: '/dashboard/activities' },
     { name: 'Analytics', icon: <BarChart3 size={20} />, path: '/dashboard/analytics' },
     { name: 'Billing', icon: <CreditCard size={20} />, path: '/dashboard/billing' },
-    { name: 'Team', icon: <Users size={20} />, path: '/dashboard/team' },
   ];
 
   return (
     <div className="w-64 h-screen bg-gradient-to-b from-[#1e3a8a] to-[#1e40af] text-white flex flex-col p-4 fixed left-0 top-0 z-50">
       <div className="flex items-center gap-2 px-4 mb-10">
         <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center font-bold text-xl italic">S</div>
-        <span className="text-xl font-bold tracking-tight">Salesor</span>
+        <Link to="/" className="text-xl font-bold tracking-tight">Salesor</Link>
       </div>
 
       <nav className="flex-grow space-y-1">
@@ -43,10 +53,21 @@ const Sidebar = () => {
             }`}>
           <Settings size={20} /> Settings
         </NavLink>
+        <button 
+          onClick={() => setIsLogoutModalOpen(true)}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-red-100 hover:bg-red-800/50 mt-1 cursor-pointer"
+        >
+          <LogOut size={20} /> Logout
+        </button>
         <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 mt-4 transition-all shadow-lg cursor-pointer">
           <Plus size={18} /> Add Lead
         </button>
       </div>
+      <LogoutModal 
+        isOpen={isLogoutModalOpen} 
+        onClose={() => setIsLogoutModalOpen(false)} 
+        onConfirm={handleLogout} 
+      />
     </div>
   );
 };

@@ -8,6 +8,33 @@ const generateToken = (id) => {
     });
 };
 
+// Set token cookie
+const sendTokenResponse = (user, statusCode, res) => {
+    const token = generateToken(user._id);
+
+    const options = {
+        expires: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
+        ),
+        httpOnly: true,
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        options.secure = true;
+    }
+
+    res
+        .status(statusCode)
+        .cookie('token', token, options)
+        .json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token,
+        });
+};
+
 // @desc    Register new user
 // @route   POST /auth/register
 // @access  Public
@@ -29,13 +56,7 @@ exports.register = async (req, res) => {
         });
 
         if (user) {
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id),
-            });
+            sendTokenResponse(user, 201, res);
         } else {
             res.status(400).json({ message: 'Invalid user data' });
         }
@@ -54,13 +75,7 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email }).select('+password');
 
         if (user && (await user.matchPassword(password))) {
-            res.json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id),
-            });
+            sendTokenResponse(user, 200, res);
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -120,4 +135,15 @@ exports.updatePassword = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
+};
+// @desc    Log out user / clear cookie
+// @route   POST /auth/logout
+// @access  Public
+exports.logout = async (req, res) => {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() + 10 * 1000), // 10 seconds
+        httpOnly: true,
+    });
+
+    res.status(200).json({ message: 'User logged out successfully' });
 };

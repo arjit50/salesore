@@ -5,12 +5,15 @@ const {
     createLead,
     updateLead,
     deleteLead,
+    importLeads,
 } = require('../controllers/leadController');
 const { protect, authorize } = require('../../../middleware/authMiddleware');
 
 const router = express.Router();
 
 router.use(protect); // Protect all routes
+
+router.post('/bulk', importLeads);
 
 router.route('/')
     .get(getLeads)

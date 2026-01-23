@@ -102,3 +102,30 @@ exports.deleteLead = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+// @desc    Import bulk leads
+// @route   POST /leads/bulk
+// @access  Private
+exports.importLeads = async (req, res) => {
+    try {
+        const leadsData = req.body;
+
+        if (!Array.isArray(leadsData)) {
+            return res.status(400).json({ message: 'Input data must be an array' });
+        }
+
+        // Add assignedTo if available in req.user
+        const leads = leadsData.map(lead => ({
+            ...lead,
+            assignedTo: req.user ? req.user.id : undefined
+        }));
+
+        const result = await Lead.insertMany(leads);
+
+        // Invalidate cache
+        await redisClient.del(CACHE_KEY);
+
+        res.status(201).json({ message: 'Leads imported successfully', count: result.length });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

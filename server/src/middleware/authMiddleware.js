@@ -4,12 +4,12 @@ const User = require('../modules/auth/models/User');
 exports.protect = async (req, res, next) => {
     let token;
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
+    if (req.cookies && req.cookies.token) {
+        token = req.cookies.token;
+    }
+
+    if (token) {
         try {
-            token = req.headers.authorization.split(' ')[1];
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 

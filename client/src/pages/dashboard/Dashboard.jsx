@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -59,7 +60,7 @@ const Dashboard = () => {
                 <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 w-64 transition-all" />
                 <span className="absolute left-3 top-2.5 text-slate-400 group-focus-within:text-blue-500">🔍</span>
             </div>
-            <div className="flex items-center gap-3 bg-white p-1 pr-4 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+            <Link to="/dashboard/settings" className="flex items-center gap-3 bg-white p-1 pr-4 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold border border-blue-200 shadow-inner">
                   {user?.name?.[0] || 'U'}
                 </div>
@@ -67,7 +68,7 @@ const Dashboard = () => {
                     <p className="font-bold text-slate-800">{user?.name || 'User'}</p>
                     <p className="text-slate-400 font-medium">{user?.role || 'Member'}</p>
                 </div>
-            </div>
+            </Link>
         </div>
       </div>
 

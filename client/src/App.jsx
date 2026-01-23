@@ -11,7 +11,6 @@ import Pipeline from './pages/dashboard/Pipeline'
 import Customers from './pages/dashboard/Customers'
 import Activities from './pages/dashboard/Activities'
 import Analytics from './pages/dashboard/Analytics'
-import Team from './pages/dashboard/Team'
 import Settings from './pages/dashboard/Settings'
 import DashboardLayout from './components/layout/DashboardLayout'
 
@@ -41,7 +40,6 @@ const App = () => {
             <Route path='activities' element={<Activities/>}/>
             <Route path='analytics' element={<Analytics/>}/>
             <Route path='billing' element={<Billing/>}/>
-            <Route path='team' element={<Team/>}/>
             <Route path='settings' element={<Settings/>}/>
           </Route>
         </Route>

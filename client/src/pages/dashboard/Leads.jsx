@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MoreHorizontal, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, Mail, Upload, Pencil } from 'lucide-react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import AddLeadModal from './components/AddLeadModal';
+import EditLeadModal from './components/EditLeadModal';
+import ImportLeadsModal from './components/ImportLeadsModal';
+import ExportConfirmModal from './components/ExportConfirmModal';
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const fetchLeads = async () => {
     try {
@@ -25,6 +35,43 @@ const Leads = () => {
 
   const handleLeadAdded = (newLead) => {
     setLeads([newLead, ...leads]);
+  };
+
+  const handleEdit = (lead) => {
+    setEditingLead(lead);
+    setIsEditModalOpen(true);
+  };
+
+  const handleLeadUpdated = (updatedLead) => {
+    setLeads(leads.map(l => l._id === updatedLead._id ? updatedLead : l));
+  };
+
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = 
+      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.company?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'All' || lead.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleExport = () => {
+    const exportData = filteredLeads.map(lead => ({
+      Name: lead.name,
+      Email: lead.email,
+      Company: lead.company || 'N/A',
+      Status: lead.status,
+      Value: lead.value || 0,
+      Source: lead.source || 'N/A',
+      Date: new Date(lead.createdAt).toLocaleDateString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+    XLSX.writeFile(workbook, "Leads_Export.xlsx");
   };
 
   const getStatusColor = (status) => {
@@ -55,12 +102,20 @@ const Leads = () => {
           <h1 className="text-2xl font-bold text-slate-800">Leads</h1>
           <p className="text-slate-500 text-sm">Manage your potential customers and opportunities.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-200"
-        >
-          <Plus size={18} /> Add New Lead
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => setIsImportModalOpen(true)}
+            className="bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
+          >
+            <Upload size={18} /> Import
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-200 cursor-pointer"
+          >
+            <Plus size={18} /> Add New Lead
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -69,15 +124,33 @@ const Leads = () => {
           <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search leads..." 
+            placeholder="Search leads by name, email or company..." 
             className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-slate-600 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50">
-            <Filter size={16} /> Filter
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-slate-600 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50">
+          <div className="relative">
+            <select 
+              className="appearance-none flex items-center gap-2 px-10 py-2 text-slate-600 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 focus:outline-none cursor-pointer"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All Status</option>
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Qualified">Qualified</option>
+              <option value="Proposal">Proposal</option>
+              <option value="Won">Won</option>
+              <option value="Lost">Lost</option>
+            </select>
+            <Filter size={16} className="absolute left-4 top-2.5 text-slate-400 pointer-events-none" />
+          </div>
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-slate-600 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-all cursor-pointer"
+          >
             Export
           </button>
         </div>
@@ -96,8 +169,8 @@ const Leads = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {leads.length > 0 ? (
-              leads.map((lead) => (
+            {filteredLeads.length > 0 ? (
+              filteredLeads.map((lead) => (
                 <tr key={lead._id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -123,8 +196,11 @@ const Leads = () => {
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
-                        <Phone size={16} />
+                      <button 
+                        onClick={() => handleEdit(lead)}
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        <Pencil size={16} />
                       </button>
                       <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
                         <Mail size={16} />
@@ -148,7 +224,7 @@ const Leads = () => {
         
         {/* Pagination */}
         <div className="p-4 border-t border-slate-100 flex justify-between items-center">
-            <p className="text-xs text-slate-400">Showing {leads.length} leads</p>
+            <p className="text-xs text-slate-400">Showing {filteredLeads.length} leads</p>
             <div className="flex gap-2">
                 <button className="px-3 py-1 text-xs font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 disabled:opacity-50">Prev</button>
                 <button className="px-3 py-1 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Next</button>
@@ -160,6 +236,29 @@ const Leads = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onLeadAdded={handleLeadAdded}
+      />
+
+      <EditLeadModal 
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingLead(null);
+        }}
+        onLeadUpdated={handleLeadUpdated}
+        lead={editingLead}
+      />
+
+      <ImportLeadsModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+        onImportSuccess={fetchLeads}
+      />
+
+      <ExportConfirmModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onConfirm={handleExport}
+        count={filteredLeads.length}
       />
     </div>
   );

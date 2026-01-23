@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const leadSchema = new mongoose.Schema({
+const customerSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Please add a name'],
@@ -12,18 +12,21 @@ const leadSchema = new mongoose.Schema({
     phone: {
         type: String,
     },
+    company: {
+        type: String,
+    },
     status: {
         type: String,
-        enum: ['New', 'Contacted', 'Qualified', 'Proposal', 'Lost', 'Won'],
-        default: 'New',
+        enum: ['Active', 'Inactive'],
+        default: 'Active',
     },
-    source: {
-        type: String,
-        default: 'Web',
-    },
-    value: {
+    totalSpent: {
         type: Number,
         default: 0,
+    },
+    lastOrderDate: {
+        type: Date,
+        default: Date.now,
     },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
@@ -35,4 +38,4 @@ const leadSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Lead', leadSchema);
+module.exports = mongoose.model('Customer', customerSchema);
