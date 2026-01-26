@@ -8,16 +8,20 @@ const CACHE_KEY = 'analytics:dashboard';
 // @access  Private
 exports.getDashboardStats = async (req, res) => {
     try {
+        const cacheKey = `analytics:dashboard:${req.user.id}`;
+
         // Check cache
-        const cachedStats = await redisClient.get(CACHE_KEY);
+        const cachedStats = await redisClient.get(cacheKey);
         if (cachedStats) {
+            console.log(`Cache Hit for ${cacheKey}`);
             return res.status(200).json(JSON.parse(cachedStats));
         }
 
-        const stats = await getStats();
+        console.log(`Cache Miss for ${cacheKey}`);
+        const stats = await getStats(req.user.id);
 
         // Set cache (expire in 10 minutes)
-        await redisClient.set(CACHE_KEY, JSON.stringify(stats), {
+        await redisClient.set(cacheKey, JSON.stringify(stats), {
             EX: 600
         });
 

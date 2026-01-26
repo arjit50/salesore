@@ -12,6 +12,9 @@ const leadSchema = new mongoose.Schema({
     phone: {
         type: String,
     },
+    whatsappNumber: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ['New', 'Contacted', 'Qualified', 'Proposal', 'Lost', 'Won'],
@@ -19,7 +22,7 @@ const leadSchema = new mongoose.Schema({
     },
     source: {
         type: String,
-        default: 'Web',
+        default: 'Website',
     },
     value: {
         type: Number,
@@ -29,6 +32,24 @@ const leadSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    history: [
+        {
+            type: {
+                type: String,
+                enum: ['Email', 'StatusChange', 'Note', 'Call'],
+                required: true
+            },
+            content: String,
+            date: {
+                type: Date,
+                default: Date.now
+            },
+            performedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            }
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now,

@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
         enum: ['Admin', 'Manager', 'Sales'],
         default: 'Sales',
     },
+    salesTarget: {
+        type: Number,
+        default: 100000,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

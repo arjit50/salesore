@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import {Star} from  'lucide-react'
 import Navbar from '../components/Navbar'
+import { useAuth } from "../context/AuthContext";
 
 const Homepage = () => {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-100 to-white">
       <Navbar/>
@@ -26,10 +28,10 @@ const Homepage = () => {
         {/* Buttons */}
         <div className="mt-8 flex justify-center gap-4">
           <Link
-            to="/signup"
+            to={user ? "/dashboard" : "/signup"}
             className="bg-black text-white px-6 py-3 rounded-md font-medium"
           >
-            Get Started
+            {user ? "Go to Dashboard" : "Get Started"}
           </Link>
           <button className="border border-gray-400 px-6 py-3 rounded-md font-medium">
             Learn More

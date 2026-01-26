@@ -97,6 +97,7 @@ exports.updateDetails = async (req, res) => {
     const fieldsToUpdate = {
         name: req.body.name,
         email: req.body.email,
+        salesTarget: req.body.salesTarget,
     };
 
     try {
@@ -110,6 +111,7 @@ exports.updateDetails = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            salesTarget: user.salesTarget,
         });
     } catch (error) {
         res.status(400).json({ message: error.message });

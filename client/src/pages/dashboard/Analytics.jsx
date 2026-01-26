@@ -1,23 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { Loader2 } from 'lucide-react';
 
 const Analytics = () => {
-  const data = [
-    { name: 'Jan', revenue: 4000, users: 400 },
-    { name: 'Feb', revenue: 3000, users: 300 },
-    { name: 'Mar', revenue: 5000, users: 500 },
-    { name: 'Apr', revenue: 4500, users: 450 },
-    { name: 'May', revenue: 6000, users: 600 },
-    { name: 'Jun', revenue: 5500, users: 550 },
-  ];
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const pieData = [
-    { name: 'Direct', value: 400, color: '#3b82f6' },
-    { name: 'Social', value: 300, color: '#6366f1' },
-    { name: 'Email', value: 200, color: '#8b5cf6' },
-    { name: 'Other', value: 100, color: '#ec4899' },
-  ];
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:5000/analytics/dashboard');
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[80vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-blue-600" size={48} />
+      </div>
+    );
+  }
+
+  const chartData = stats?.weeklyPerformance?.map(p => ({
+    name: new Date(p._id).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+    revenue: p.revenue || 0,
+    leads: p.leads || 0
+  })) || [];
+
+  const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f97316'];
+  const pieData = stats?.sourceBreakdown?.map((s, i) => ({
+    name: s._id,
+    value: s.value,
+    color: COLORS[i % COLORS.length]
+  })) || [];
+
 
   return (
     <motion.div 
@@ -39,9 +64,9 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Total Revenue', val: '₹ 24.5L', trend: '↑ 15%', color: 'from-blue-600 to-indigo-700' },
-          { label: 'Active Users', val: '1,240', trend: '↑ 8%', color: 'from-violet-600 to-purple-700' },
-          { label: 'Conversion', val: '2.4%', trend: '↓ 0.5%', color: 'from-rose-500 to-orange-600' }
+          { label: 'Total Revenue', val: `₹ ${(stats?.totalRevenue / 100000).toFixed(1)}L`, trend: 'Active', color: 'from-blue-600 to-indigo-700' },
+          { label: 'Total Leads', val: stats?.totalLeads || 0, trend: '↑ Today', color: 'from-violet-600 to-purple-700' },
+          { label: 'Conversion', val: `${(stats?.conversionRate || 0).toFixed(1)}%`, trend: 'Win Rate', color: 'from-rose-500 to-orange-600' }
         ].map((stat, i) => (
           <motion.div 
             key={i}
@@ -53,7 +78,7 @@ const Analytics = () => {
             <h2 className="text-4xl font-black mb-2">{stat.val}</h2>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold px-2 py-0.5 bg-white/20 rounded-lg">{stat.trend}</span>
-              <span className="text-[10px] text-white/50 font-bold">vs last month</span>
+              <span className="text-[10px] text-white/50 font-bold">Real-time Data</span>
             </div>
           </motion.div>
         ))}
@@ -62,11 +87,11 @@ const Analytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
             <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span> Revenue Trend
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span> Revenue Trend (Last 7 Days)
             </h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
@@ -76,7 +101,10 @@ const Analytics = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
-                  <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    formatter={(value) => [`₹ ${value.toLocaleString()}`, 'Revenue']}
+                  />
                   <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -111,7 +139,7 @@ const Analytics = () => {
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
                     <span className="text-xs font-bold text-slate-600">{d.name}</span>
-                    <span className="text-[10px] text-slate-400 font-bold">{((d.value/1000)*100).toFixed(0)}%</span>
+                    <span className="text-[10px] text-slate-400 font-bold">{((d.value / (stats?.totalLeads || 1)) * 100).toFixed(0)}%</span>
                   </div>
                 ))}
               </div>

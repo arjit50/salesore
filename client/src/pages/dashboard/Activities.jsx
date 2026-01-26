@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, FileText, CheckCircle, Clock } from 'lucide-react';
+import { Phone, Mail, FileText, CheckCircle, Clock, RefreshCcw } from 'lucide-react';
 import axios from 'axios';
 
 const Activities = () => {
@@ -11,14 +11,14 @@ const Activities = () => {
             try {
                 const { data } = await axios.get('http://localhost:5000/analytics/dashboard');
                 // Map lead updates to activity format
-                const mappedActivities = data.recentActivities.map(lead => ({
-                    id: lead._id,
-                    type: lead.status === 'New' ? 'task' : 'call', // Mocking types based on status
-                    title: `Lead Update: ${lead.name}`,
-                    description: `Status changed to ${lead.status}. Value: ₹ ${lead.value?.toLocaleString()}`,
-                    time: new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    date: new Date(lead.updatedAt).toLocaleDateString() === new Date().toLocaleDateString() ? 'Today' : new Date(lead.updatedAt).toLocaleDateString(),
-                    status: lead.status === 'Won' ? 'Completed' : 'Pending'
+                const mappedActivities = data.recentActivities.map(activity => ({
+                    id: activity._id,
+                    type: activity.type.toLowerCase(),
+                    title: `${activity.type}: ${activity.leadName}`,
+                    description: activity.content,
+                    time: new Date(activity.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    date: new Date(activity.date).toLocaleDateString() === new Date().toLocaleDateString() ? 'Today' : new Date(activity.date).toLocaleDateString(),
+                    status: 'Completed'
                 }));
                 setActivities(mappedActivities);
             } catch (error) {
@@ -35,7 +35,8 @@ const Activities = () => {
         switch(type) {
             case 'call': return <Phone size={18} className="text-blue-600"/>;
             case 'email': return <Mail size={18} className="text-purple-600"/>;
-            case 'meeting': return <Clock size={18} className="text-orange-600"/>;
+            case 'statuschange': return <RefreshCcw size={18} className="text-emerald-600"/>;
+            case 'note': return <FileText size={18} className="text-slate-600"/>;
             case 'task': return <CheckCircle size={18} className="text-green-600"/>;
             default: return <FileText size={18} className="text-slate-600"/>;
         }
@@ -45,7 +46,8 @@ const Activities = () => {
          switch(type) {
             case 'call': return 'bg-blue-100 border-blue-200';
             case 'email': return 'bg-purple-100 border-purple-200';
-            case 'meeting': return 'bg-orange-100 border-orange-200';
+            case 'statuschange': return 'bg-emerald-100 border-emerald-200';
+            case 'note': return 'bg-slate-100 border-slate-200';
             case 'task': return 'bg-green-100 border-green-200';
             default: return 'bg-slate-100 border-slate-200';
         }

@@ -32,7 +32,7 @@ app.use('/leads', require('./modules/leads/routes/leadRoutes'));
 app.use('/analytics', require('./modules/analytics/routes/analyticsRoutes'));
 app.use('/customers', require('./modules/customers/routes/customerRoutes'));
 app.use('/billing', require('./modules/billing/routes/billingRoutes'));
-app.use('/notifications', require('./modules/notifications/routes/notificationRoutes'));
+app.use('/chat', require('./modules/chat/routes/chatRoutes'));
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
