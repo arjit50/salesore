@@ -45,20 +45,20 @@ const Analytics = () => {
 
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="space-y-8 pb-10"
     >
       <div className="flex justify-between items-center">
-         <div>
+        <div>
           <h1 className="text-2xl font-bold text-slate-800">Advanced Analytics</h1>
           <p className="text-slate-500 text-sm font-medium">Deep dive into your sales and growth metrics.</p>
         </div>
         <select className="bg-white border border-slate-200 text-slate-500 text-[10px] font-black px-4 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm">
-            <option>LAST 30 DAYS</option>
-            <option>LAST QUARTER</option>
-            <option>LAST YEAR</option>
+          <option>LAST 30 DAYS</option>
+          <option>LAST QUARTER</option>
+          <option>LAST YEAR</option>
         </select>
       </div>
 
@@ -68,7 +68,7 @@ const Analytics = () => {
           { label: 'Total Leads', val: stats?.totalLeads || 0, trend: '↑ Today', color: 'from-violet-600 to-purple-700' },
           { label: 'Conversion', val: `${(stats?.conversionRate || 0).toFixed(1)}%`, trend: 'Win Rate', color: 'from-rose-500 to-orange-600' }
         ].map((stat, i) => (
-          <motion.div 
+          <motion.div
             key={i}
             whileHover={{ y: -5 }}
             className={`bg-gradient-to-br ${stat.color} rounded-[2rem] p-8 text-white shadow-xl shadow-slate-200 relative overflow-hidden group`}
@@ -86,64 +86,136 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-            <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span> Revenue Trend (Last 7 Days)
-            </h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                    formatter={(value) => [`₹ ${value.toLocaleString()}`, 'Revenue']}
-                  />
-                  <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+          <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span> Revenue Trend (Last 7 Days)
+          </h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
+                <Tooltip
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  formatter={(value) => [`₹ ${value.toLocaleString()}`, 'Revenue']}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-            <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-500"></span> Lead Sources
-            </h3>
-            <div className="h-[300px] w-full flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-3 pr-8">
-                {pieData.map((d, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-                    <span className="text-xs font-bold text-slate-600">{d.name}</span>
-                    <span className="text-[10px] text-slate-400 font-bold">{((d.value / (stats?.totalLeads || 1)) * 100).toFixed(0)}%</span>
-                  </div>
-                ))}
-              </div>
+          <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-purple-500"></span> Lead Sources
+          </h3>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="space-y-3 pr-8">
+              {pieData.map((d, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
+                  <span className="text-xs font-bold text-slate-600">{d.name}</span>
+                  <span className="text-[10px] text-slate-400 font-bold">{((d.value / (stats?.totalLeads || 1)) * 100).toFixed(0)}%</span>
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Source Conversion Performance Table */}
+      <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+        <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-500"></span> Source Conversion Performance
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="text-left py-4 px-4 text-xs font-black text-slate-500 uppercase tracking-wider">Source</th>
+                <th className="text-center py-4 px-4 text-xs font-black text-slate-500 uppercase tracking-wider">Total Leads</th>
+                <th className="text-center py-4 px-4 text-xs font-black text-slate-500 uppercase tracking-wider">Won Leads</th>
+                <th className="text-center py-4 px-4 text-xs font-black text-slate-500 uppercase tracking-wider">Conversion Rate</th>
+                <th className="text-right py-4 px-4 text-xs font-black text-slate-500 uppercase tracking-wider">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats?.sourceConversion?.map((source, index) => (
+                <motion.tr
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
+                >
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="font-bold text-slate-700 text-sm">{source._id || 'Unknown'}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-sm font-bold text-slate-600">{source.totalLeads}</span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-sm font-bold text-green-600">{source.wonLeads || 0}</span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min(source.conversionRate || 0, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-black text-slate-700 min-w-[3rem]">
+                        {(source.conversionRate || 0).toFixed(1)}%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <span className="text-sm font-bold text-blue-600">
+                      ₹ {(source.totalRevenue || 0).toLocaleString()}
+                    </span>
+                  </td>
+                </motion.tr>
+              ))}
+              {(!stats?.sourceConversion || stats.sourceConversion.length === 0) && (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-slate-400 text-sm font-medium">
+                    No conversion data available yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </motion.div>

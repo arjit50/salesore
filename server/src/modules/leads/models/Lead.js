@@ -28,6 +28,17 @@ const leadSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    emailOpens: {
+        type: Number,
+        default: 0,
+    },
+    emailReplies: {
+        type: Number,
+        default: 0,
+    },
+    lastEngagementDate: {
+        type: Date,
+    },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

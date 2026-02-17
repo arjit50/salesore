@@ -9,6 +9,7 @@ const SignUpPage = () => {
     email: '',
     password: ''
   });
+
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SignUpPage = () => {
 
   return (
     <div className="h-screen w-full bg-[#f0f5ff] flex flex-col overflow-hidden font-sans">
-      {/* Header with Logo on the Left */}
+      
       <header className="w-full p-8 md:p-10 absolute top-0 left-0">
         <a href="/" className="text-2xl font-bold text-blue-600 tracking-tight hover:opacity-80 transition-opacity">
           Salesor

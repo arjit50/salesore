@@ -54,6 +54,10 @@ exports.sendEmailToLead = async (req, res) => {
             });
         }
 
+        // Simulate engagement tracking for lead scoring
+        lead.emailOpens = (lead.emailOpens || 0) + 1;
+        lead.lastEngagementDate = new Date();
+
         await lead.save();
 
         // Invalidate caches
@@ -130,6 +134,7 @@ exports.createLead = async (req, res) => {
 
         // Invalidate cache
         await redisClient.del(getCacheKey(req.user.id));
+        await redisClient.del(`analytics:dashboard:${req.user.id}`);
 
         res.status(201).json(lead);
     } catch (error) {
@@ -185,6 +190,7 @@ exports.deleteLead = async (req, res) => {
 
         // Invalidate cache
         await redisClient.del(getCacheKey(req.user.id));
+        await redisClient.del(`analytics:dashboard:${req.user.id}`);
 
         res.status(200).json({ message: 'Lead removed' });
     } catch (error) {
@@ -212,6 +218,7 @@ exports.importLeads = async (req, res) => {
 
         // Invalidate cache
         await redisClient.del(getCacheKey(req.user.id));
+        await redisClient.del(`analytics:dashboard:${req.user.id}`);
 
         res.status(201).json({ message: 'Leads imported successfully', count: result.length });
     } catch (error) {
@@ -237,6 +244,7 @@ exports.deleteLeadsBulk = async (req, res) => {
 
         // Invalidate cache
         await redisClient.del(getCacheKey(req.user.id));
+        await redisClient.del(`analytics:dashboard:${req.user.id}`);
 
         res.status(200).json({ message: `${result.deletedCount} leads deleted successfully` });
     } catch (error) {
@@ -303,6 +311,10 @@ exports.sendEmailToLeadsBulk = async (req, res) => {
                     });
                 }
 
+                // Simulate engagement tracking for lead scoring
+                lead.emailOpens = (lead.emailOpens || 0) + 1;
+                lead.lastEngagementDate = new Date();
+
                 await lead.save();
                 successCount++;
             } catch (err) {
@@ -351,6 +363,9 @@ exports.sendWhatsAppToLeadsBulk = async (req, res) => {
                 date: new Date(),
                 performedBy: req.user.id
             });
+
+            // Update last engagement date
+            lead.lastEngagementDate = new Date();
 
             // Auto-convert status
             if (lead.status === 'New') {

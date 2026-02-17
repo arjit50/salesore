@@ -11,11 +11,15 @@ const {
     sendEmailToLeadsBulk,
     sendWhatsAppToLeadsBulk,
 } = require('../controllers/leadController');
+const { captureLead } = require('../controllers/publicLeadController');
 const { protect, authorize } = require('../../../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.use(protect); // Protect all routes
+// Public Routes
+router.post('/public/:userId', captureLead);
+
+router.use(protect); // Protect all routes below this line
 
 router.post('/bulk', importLeads);
 router.post('/bulk-delete', authorize('Admin', 'Manager'), deleteLeadsBulk);

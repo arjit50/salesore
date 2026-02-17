@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserSquare2, Activity, BarChart3, CreditCard, Settings, Plus, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, UserSquare2, Activity, BarChart3, CreditCard, Settings, Plus, LogOut, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LogoutModal from './LogoutModal';
 
@@ -21,6 +21,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'Customers', icon: <Users size={20} />, path: '/dashboard/customers' },
     { name: 'Activities', icon: <Activity size={20} />, path: '/dashboard/activities' },
     { name: 'Analytics', icon: <BarChart3 size={20} />, path: '/dashboard/analytics' },
+    { name: 'Web Forms', icon: <Globe size={20} />, path: '/dashboard/web-to-lead' },
     { name: 'Billing', icon: <CreditCard size={20} />, path: '/dashboard/billing' },
   ];
 
@@ -34,9 +35,9 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           </div>
         )}
         {isCollapsed && (
-             <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center font-bold text-xl italic mx-auto">S</div>
+          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center font-bold text-xl italic mx-auto">S</div>
         )}
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`p-1.5 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition-colors ${isCollapsed ? 'absolute -right-3 top-20 bg-blue-600 shadow-lg' : ''}`}
         >
@@ -50,9 +51,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             key={item.path}
             to={item.path}
             end={item.path === '/dashboard'} // Only exact match for root dashboard
-            className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
-              isActive ? 'bg-blue-600 shadow-lg' : 'hover:bg-blue-800/50 text-blue-100'
-            } ${isCollapsed ? 'justify-center px-2' : ''}`}
+            className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive ? 'bg-blue-600 shadow-lg' : 'hover:bg-blue-800/50 text-blue-100'
+              } ${isCollapsed ? 'justify-center px-2' : ''}`}
             title={isCollapsed ? item.name : ''}
           >
             {item.icon}
@@ -62,12 +62,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       </nav>
 
       <div className="pt-4 border-t border-blue-800 space-y-1">
-        <NavLink to="/dashboard/settings" title={isCollapsed ? "Settings" : ""} className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
-              isActive ? 'bg-blue-600 shadow-lg' : 'text-blue-100 hover:bg-blue-800/50'
-            } ${isCollapsed ? 'justify-center px-2' : ''}`}>
+        <NavLink to="/dashboard/settings" title={isCollapsed ? "Settings" : ""} className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive ? 'bg-blue-600 shadow-lg' : 'text-blue-100 hover:bg-blue-800/50'
+          } ${isCollapsed ? 'justify-center px-2' : ''}`}>
           <Settings size={20} /> {!isCollapsed && <span>Settings</span>}
         </NavLink>
-        <button 
+        <button
           onClick={() => setIsLogoutModalOpen(true)}
           title={isCollapsed ? "Logout" : ""}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-red-100 hover:bg-red-800/50 mt-1 cursor-pointer ${isCollapsed ? 'justify-center px-2' : ''}`}
@@ -75,10 +74,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           <LogOut size={20} /> {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
-      <LogoutModal 
-        isOpen={isLogoutModalOpen} 
-        onClose={() => setIsLogoutModalOpen(false)} 
-        onConfirm={handleLogout} 
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
       />
     </div>
   );
